@@ -684,7 +684,7 @@ select:focus-visible {
   }
 }
 
-/* ---------------------------------------------- avatarkaders (24 presets) */
+/* --------------------------------------------- avatarkaders (152 presets) */
 @keyframes rout-frame-pulse {
   0%,
   100% {
@@ -737,6 +737,16 @@ select:focus-visible {
 .rout-frame-shimmer {
   animation: rout-frame-shimmer 6s ease-in-out infinite;
 }
+
+/* Profile Studio button motion; all effects stop in reduced-motion mode. */
+.rout-btn-lift:hover { transform: translateY(-3px); }
+.rout-btn-glow:hover { filter: brightness(1.08); box-shadow: 0 0 24px -8px currentColor; }
+.rout-btn-press:active { transform: translateY(2px) scale(0.99); }
+.rout-btn-shine { position: relative; overflow: hidden; }
+.rout-btn-shine::after { content: ""; position: absolute; inset: 0; transform: translateX(-140%) skewX(-18deg); background: linear-gradient(90deg, transparent, color-mix(in oklab, currentColor 18%, transparent), transparent); transition: transform 600ms ease; }
+.rout-btn-shine:hover::after { transform: translateX(140%) skewX(-18deg); }
+@keyframes rout-btn-pulse { 50% { filter: brightness(1.14); } }
+.rout-btn-pulse { animation: rout-btn-pulse 2.6s ease-in-out infinite; }
 
 
 /* --- Avatardecoraties & footer (Discord-achtige extra's) ------------------ */
@@ -808,6 +818,7 @@ select:focus-visible {
   transform-origin: 50% 50%;
   animation: rout-deco-orbit 18s linear infinite;
 }
+.rout-deco-pulse { animation: rout-frame-pulse 2.8s ease-in-out infinite; }
 .rout-footer-ticker {
   display: inline-block;
   animation: rout-footer-ticker 18s linear infinite;
@@ -818,6 +829,7 @@ select:focus-visible {
   .rout-deco-float,
   .rout-deco-flicker,
   .rout-deco-scan,
+  .rout-deco-pulse,
   .rout-footer-ticker,
   .rout-deco-orbit .rout-deco-orbit-inner {
     animation: none;

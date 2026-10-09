@@ -110,9 +110,17 @@ import {
   checkStudioHandle,
   getStudioAnalytics,
   getStudioProfile,
+  publishStudioProfile,
+  discardStudioDraft,
   saveStudioProfile,
 } from "@/lib/studio-profile.functions";
-import { checkAliasHandle, getAliasProfile, saveAliasProfile } from "@/lib/alias-profile.functions";
+import {
+  checkAliasHandle,
+  discardAliasDraft,
+  getAliasProfile,
+  publishAliasProfile,
+  saveAliasProfile,
+} from "@/lib/alias-profile.functions";
 import { SubdomainPanel } from "@/components/dashboard/SubdomainPanel";
 import { BadgesPanel } from "@/components/dashboard/BadgesPanel";
 import { SocialVerifyPanel } from "@/components/dashboard/SocialVerifyPanel";
@@ -141,6 +149,8 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   const loadProfileEditor = useServerFn(alias ? getAliasProfile : getStudioProfile);
   const checkHandle = useServerFn(alias ? checkAliasHandle : checkStudioHandle);
   const saveProfile = useServerFn(alias ? saveAliasProfile : saveStudioProfile);
+  const publishProfile = useServerFn(alias ? publishAliasProfile : publishStudioProfile);
+  const discardDraft = useServerFn(alias ? discardAliasDraft : discardStudioDraft);
   const loadAnalytics = useServerFn(getStudioAnalytics);
   const [tab, setTab] = useState<StudioTab>("links");
   // Welke accordion open staat op het tabblad "Settings & verified" — de
@@ -156,6 +166,10 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   const [dirty, setDirty] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [retryIn, setRetryIn] = useState(0);
+  const [draftRevision, setDraftRevision] = useState(0);
+  const [publishedRevision, setPublishedRevision] = useState(0);
+  const [publishing, setPublishing] = useState(false);
+  const [discarding, setDiscarding] = useState(false);
   const editRev = useRef(0);
   const failCount = useRef(0);
   const queryClient = useQueryClient();
@@ -255,6 +269,8 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
           setTheme(data.theme ?? "noir");
           setCardStyle(data.cardStyle ?? "bordered");
           setBlocks(Array.isArray(data.blocks) ? (data.blocks as unknown as ProfileBlock[]) : []);
+          setDraftRevision(data.draftRevision ?? 0);
+          setPublishedRevision(data.publishedRevision ?? 0);
         } else {
           const wanted = (user.user_metadata?.desired_handle as string | undefined) ?? "";
           setHandle(normalizeHandle(wanted || user.email?.split("@")[0] || ""));
@@ -531,6 +547,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
         cardStyle,
         blocks: blocks as unknown as never,
         displayPrefs: prefs as unknown as never,
+        expectedRevision: draftRevision,
       },
     });
     } catch (e) {
@@ -554,16 +571,86 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
       return toast.error(result.reason ?? "Saving failed");
     }
     setClaimed(normalized);
-    // Handle direct live: publieke cache leegmaken zodat rout.be/<handle>
-    // meteen rendert zonder herlaad of serverherstart.
-    void queryClient.invalidateQueries({ queryKey: ["public-profile", normalized] });
-    void router.invalidate();
+    const nextRevision = Number((result.profile as { draftRevision?: number } | null)?.draftRevision ?? draftRevision);
+    const nextPublished = Number((result.profile as { publishedRevision?: number } | null)?.publishedRevision ?? publishedRevision);
+    setDraftRevision(nextRevision);
+    setPublishedRevision(nextPublished);
     failCount.current = 0;
     setSaveError(null);
     // Alleen "opgeslagen" als er tijdens het opslaan niets meer veranderde.
     if (editRev.current === rev) setDirty(false);
     setSavedAt(Date.now());
-    if (!silent) toast.success("Studio saved");
+    if (!silent) toast.success("Concept opgeslagen");
+  };
+
+  const publish = async () => {
+    if (dirty || saving) {
+      toast.info("Wacht tot je concept is opgeslagen.");
+      return;
+    }
+    if (draftRevision === publishedRevision) {
+      toast.info("Er zijn geen nieuwe wijzigingen om te publiceren.");
+      return;
+    }
+    setPublishing(true);
+    const result = await publishProfile({ data: { expectedRevision: draftRevision } }).catch((error) => ({
+      ok: false as const,
+      meta: null,
+      reason: error instanceof Error ? error.message : "publish_failed",
+    }));
+    setPublishing(false);
+    if (!result.ok || !result.meta) {
+      if (result.reason === "draft_conflict") {
+        toast.error("Dit concept is intussen in een ander tabblad gewijzigd. Herlaad de Studio.");
+      } else {
+        toast.error("Publiceren is mislukt. Je concept blijft veilig bewaard.");
+      }
+      return;
+    }
+    setPublishedRevision(result.meta.publishedRevision);
+    setClaimed(normalized);
+    void queryClient.invalidateQueries({ queryKey: ["public-profile", normalized] });
+    void router.invalidate();
+    toast.success("Gepubliceerd ✓");
+  };
+
+  const applyPayload = (payload: Record<string, unknown>) => {
+    setHandle(String(payload["username"] ?? ""));
+    setDisplayName(String(payload["displayName"] ?? ""));
+    setTagline(String(payload["tagline"] ?? ""));
+    setAvatarUrl(String(payload["avatarUrl"] ?? ""));
+    setFaviconUrl(String(payload["faviconUrl"] ?? ""));
+    setTheme(String(payload["theme"] ?? "noir"));
+    setCardStyle(String(payload["cardStyle"] ?? "bordered"));
+    setBlocks(Array.isArray(payload["blocks"]) ? (payload["blocks"] as ProfileBlock[]) : []);
+    setPrefs(parseDisplayPrefs(payload["displayPrefs"] ?? null));
+  };
+
+  const discard = async () => {
+    if (saving || publishing) return;
+    setDiscarding(true);
+    const result = (await discardDraft({ data: { expectedRevision: draftRevision } }).catch((error) => ({
+      ok: false as const,
+      payload: null,
+      meta: null,
+      reason: error instanceof Error ? error.message : "discard_failed",
+    }))) as {
+      ok: boolean;
+      payload: Record<string, unknown> | null;
+      meta: { draftRevision: number; publishedRevision: number } | null;
+      reason: string | null;
+    };
+    setDiscarding(false);
+    if (!result.ok || !result.payload || !result.meta) {
+      toast.error(result.reason === "draft_conflict" ? "Het concept is in een ander tabblad gewijzigd." : "Wijzigingen verwerpen is mislukt.");
+      return;
+    }
+    applyPayload(result.payload as Record<string, unknown>);
+    setDraftRevision(result.meta.draftRevision);
+    setPublishedRevision(result.meta.publishedRevision);
+    setDirty(false);
+    setSaveError(null);
+    toast.success("Concept hersteld naar de gepubliceerde versie");
   };
 
   const addBlock = (kind: string, value = "") => {
@@ -764,6 +851,25 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
           >
             <Eye className="h-3.5 w-3.5" aria-hidden /> Bekijk live profiel ↗
           </a>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={discarding || publishing || saving || draftRevision === publishedRevision}
+            onClick={() => void discard()}
+          >
+            {discarding ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
+            Verwerpen
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            disabled={publishing || discarding || saving || dirty || draftRevision === publishedRevision}
+            onClick={() => void publish()}
+          >
+            {publishing ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : <Upload className="h-3.5 w-3.5" aria-hidden />}
+            {publishing ? "Publiceren…" : "Publiceren"}
+          </Button>
         </div>
       </div>
 
@@ -1631,7 +1737,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
             </>
           ) : savedAt ? (
             <>
-              <Check className="h-3 w-3 text-primary" aria-hidden /> Opgeslagen
+              <Check className="h-3 w-3 text-primary" aria-hidden /> Concept opgeslagen
             </>
           ) : null}
         </div>
@@ -1666,7 +1772,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                     className="h-3 w-3 shrink-0 text-emerald-600 dark:text-emerald-400"
                     aria-hidden
                   />
-                  Automatisch opgeslagen
+                  Concept automatisch opgeslagen
                 </>
               )}
             </p>

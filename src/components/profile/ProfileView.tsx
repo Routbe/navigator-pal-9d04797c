@@ -54,6 +54,7 @@ import {
   BIO_LOCALE_LABEL,
   type BioLocale,
   designButtonStyle,
+  buttonEffectClass,
   footerBlockStyle,
   fontPairingOf,
   wallpaperImageLayerStyle,
@@ -257,8 +258,8 @@ export function ProfileView({
       style={{
         ...surface,
         color: t.text,
-        fontFamily: prefs.customDesign ? fonts.body : FONT_FAMILY[prefs.typography],
-        fontSize: prefs.customDesign ? `${prefs.fontScale}%` : undefined,
+         fontFamily: prefs.typographyCustom || prefs.customDesign ? fonts.body : FONT_FAMILY[prefs.typography],
+         fontSize: prefs.typographyCustom || prefs.customDesign ? `${prefs.fontScale}%` : undefined,
       }}
     >
       {/* Achtergrondafbeelding + verduistering blijven binnen deze pagina:
@@ -277,7 +278,7 @@ export function ProfileView({
         />
       )}
       <div
-        className={`relative mx-auto flex w-full flex-col items-center ${wide ? "max-w-3xl" : "max-w-md"}`}
+        className={`relative mx-auto flex w-full flex-col items-center ${wide ? "max-w-2xl" : "max-w-md"}`}
       >
         <AvatarFrameWrapper
           frame={prefs.avatarFrame}
@@ -289,14 +290,16 @@ export function ProfileView({
             <img
               src={profile.avatar_url}
               alt={profile.display_name || `@${profile.username}`}
-              className={`h-20 w-20 object-cover ${avatarShape.className}`}
-              style={{ border: `1px solid ${t.border}`, ...(avatarShape.style ?? {}) }}
+              className={`${avatarShape.className} object-cover`}
+              style={{ width: prefs.avatarSize, height: prefs.avatarSize, border: `1px solid ${t.border}`, ...(avatarShape.style ?? {}) }}
               loading="lazy"
             />
           ) : (
             <div
-              className={`flex h-20 w-20 items-center justify-center text-xl font-medium ${avatarShape.className}`}
+              className={`flex items-center justify-center text-xl font-medium ${avatarShape.className}`}
               style={{
+                width: prefs.avatarSize,
+                height: prefs.avatarSize,
                 background: t.card,
                 border: `1px solid ${t.border}`,
                 ...(avatarShape.style ?? {}),
@@ -309,10 +312,10 @@ export function ProfileView({
 
         <h1
           className="mt-4 flex items-center gap-1.5 break-words text-center font-display text-2xl"
-          style={prefs.customDesign ? { fontFamily: fonts.heading } : undefined}
+          style={prefs.typographyCustom || prefs.customDesign ? { fontFamily: fonts.heading, fontSize: `${prefs.titleScale}%`, letterSpacing: prefs.titleLetterSpacing, textShadow: prefs.titleGlow > 0 ? `0 0 ${prefs.titleGlow}px currentColor` : undefined } : undefined}
         >
           <span
-            style={prefs.customDesign && prefs.titleColor ? { color: prefs.titleColor } : nameStyle}
+            style={(prefs.typographyCustom || prefs.customDesign) && prefs.titleColor ? { color: prefs.titleColor } : nameStyle}
           >
             {profile.display_name || `@${profile.username}`}
           </span>
@@ -485,7 +488,7 @@ export function ProfileView({
             het icoon met een micro-vinkje over de rechterbovenhoek. */}
         {prefs.socialPosition === "top" && socialRow}
 
-        <div className={`mt-8 grid w-full gap-3 ${wide ? "sm:grid-cols-2" : "grid-cols-1"}`}>
+         <div className={`mt-8 grid w-full gap-3 ${wide ? "lg:grid-cols-2" : "grid-cols-1"}`}>
           {blocks.length === 0 && (
             <p className="text-center text-sm" style={{ color: t.muted }}>
               No links yet.
@@ -566,6 +569,7 @@ export function ProfileView({
                 rel="noopener noreferrer"
                 className={cn(
                   "flex min-h-12 w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-opacity hover:opacity-80",
+                  buttonEffectClass(prefs.buttonEffect),
                   ctaClass(b.id),
                 )}
                 style={buttonStyle}

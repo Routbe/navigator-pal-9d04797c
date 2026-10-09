@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { themeOf } from "@/lib/profile";
 import {
   BUTTON_RADII,
+  BUTTON_EFFECTS,
+  BUTTON_SIZES,
   BUTTON_VARIANTS,
   FONT_PAIRINGS,
   FOOTER_STYLES,
@@ -164,7 +166,7 @@ export function DesignTile({
 }
 
 /** Wrapper die custom-only velden dimt zolang custom mode uitstaat. */
-function CustomGate({ custom, children }: { custom: boolean; children: React.ReactNode }) {
+function CustomGate({ custom, children, label }: { custom: boolean; children: React.ReactNode; label: string }) {
   return (
     <div
       className={cn("space-y-4 transition-opacity", custom ? "opacity-100" : "pointer-events-none opacity-50")}
@@ -172,8 +174,7 @@ function CustomGate({ custom, children }: { custom: boolean; children: React.Rea
     >
       {!custom && (
         <p className="text-[11px] text-muted-foreground">
-          Zet &ldquo;Custom mode&rdquo; aan bij 🎨 Thema &amp; Kleurenschema om deze fijnregeling te
-          gebruiken.
+          Zet &ldquo;Aanpassen&rdquo; aan bij {label} om deze fijnregeling te gebruiken.
         </p>
       )}
       {children}
@@ -236,19 +237,7 @@ export function DesignPresetSection({
           );
         })}
       </div>
-      <div className="flex items-start justify-between gap-4 rounded-xl border border-border p-3">
-        <div className="min-w-0">
-          <p className="text-sm font-medium">Custom mode</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Ontgrendel wallpaper, knopstijl, typografie en footer-controle.
-          </p>
-        </div>
-        <Switch
-          aria-label="Custom mode"
-          checked={prefs.customDesign}
-          onCheckedChange={(v) => setPref("customDesign", v)}
-        />
-      </div>
+       <p className="text-xs text-muted-foreground">Kies eerst een stijl en pas daarna ieder onderdeel afzonderlijk aan.</p>
     </section>
   );
 }
@@ -265,8 +254,12 @@ export function DesignWallpaperSection({
 }) {
   const t = themeOf(theme);
   return (
-    <CustomGate custom={prefs.customDesign}>
-      <p className="text-sm font-medium">🖼️ Wallpaper</p>
+    <section className="space-y-4">
+      <div className="flex items-start justify-between gap-4 rounded-xl border border-border p-3">
+        <div><p className="text-sm font-medium">🖼️ Achtergrond aanpassen</p><p className="mt-1 text-xs text-muted-foreground">Kleur, verloop, beeld en lichtsterkte afzonderlijk regelen.</p></div>
+        <Switch aria-label="Achtergrond aanpassen" checked={prefs.backgroundCustom} onCheckedChange={(v) => setPref("backgroundCustom", v)} />
+      </div>
+      <CustomGate custom={prefs.backgroundCustom} label="Achtergrond">
       <div className="flex flex-wrap gap-2">
         {WALLPAPER_TYPES.map((o) => (
           <Pill
@@ -357,7 +350,8 @@ export function DesignWallpaperSection({
           </div>
         </div>
       )}
-    </CustomGate>
+      </CustomGate>
+    </section>
   );
 }
 
@@ -373,8 +367,13 @@ export function DesignButtonsTypographySection({
 }) {
   const t = themeOf(theme);
   return (
-    <CustomGate custom={prefs.customDesign}>
-      <p className="text-sm font-medium">🔘 Knopstijl &amp; vorm</p>
+    <div className="space-y-5">
+      <div className="flex items-start justify-between gap-4 rounded-xl border border-border p-3">
+        <div><p className="text-sm font-medium">🔘 Knoppen aanpassen</p><p className="mt-1 text-xs text-muted-foreground">Vorm, maat, kleur en beweging los instellen.</p></div>
+        <Switch aria-label="Knoppen aanpassen" checked={prefs.buttonsCustom} onCheckedChange={(v) => setPref("buttonsCustom", v)} />
+      </div>
+      <CustomGate custom={prefs.buttonsCustom} label="Knoppen">
+      <p className="text-sm font-medium">Knopstijl &amp; vorm</p>
       <div className="grid gap-2 sm:grid-cols-2">
         {BUTTON_VARIANTS.map((v) => (
           <button
@@ -415,9 +414,15 @@ export function DesignButtonsTypographySection({
           onChange={(v) => setPref("buttonTextColor", v)}
         />
       </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2"><p className="input-label">Knopgrootte</p><Select value={prefs.buttonSize} onValueChange={(v) => setPref("buttonSize", v as ProfileDisplayPrefs["buttonSize"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{BUTTON_SIZES.map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent></Select></div>
+        <div className="space-y-2"><p className="input-label">Beweging</p><Select value={prefs.buttonEffect} onValueChange={(v) => setPref("buttonEffect", v as ProfileDisplayPrefs["buttonEffect"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{BUTTON_EFFECTS.map((o) => <SelectItem key={o.id} value={o.id}>{o.label} — {o.hint}</SelectItem>)}</SelectContent></Select></div>
+      </div>
+      </CustomGate>
 
       <div className="space-y-3 border-t border-border pt-4">
-        <p className="text-sm font-medium">🔤 Fontpaar &amp; tekstgrootte</p>
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-border p-3"><div><p className="text-sm font-medium">🔤 Naam &amp; typografie aanpassen</p><p className="mt-1 text-xs text-muted-foreground">Lettertype, schaal, afstand en gloed verfijnen.</p></div><Switch aria-label="Typografie aanpassen" checked={prefs.typographyCustom} onCheckedChange={(v) => setPref("typographyCustom", v)} /></div>
+        <CustomGate custom={prefs.typographyCustom} label="Naam en typografie">
         <Select
           value={prefs.fontPairing}
           onValueChange={(v) => setPref("fontPairing", v as ProfileDisplayPrefs["fontPairing"])}
@@ -454,14 +459,18 @@ export function DesignButtonsTypographySection({
             onValueChange={([v]) => setPref("fontScale", v ?? 100)}
           />
         </div>
+        <div className="space-y-1.5"><p className="input-label">Titelgrootte ({prefs.titleScale}%)</p><Slider value={[prefs.titleScale]} min={80} max={180} step={5} onValueChange={([v]) => setPref("titleScale", v ?? 100)} /></div>
+        <div className="space-y-1.5"><p className="input-label">Letterafstand ({prefs.titleLetterSpacing}px)</p><Slider value={[prefs.titleLetterSpacing]} min={-1} max={12} step={1} onValueChange={([v]) => setPref("titleLetterSpacing", v ?? 0)} /></div>
+        <div className="space-y-1.5"><p className="input-label">Tekstgloed ({prefs.titleGlow}px)</p><Slider value={[prefs.titleGlow]} min={0} max={40} step={2} onValueChange={([v]) => setPref("titleGlow", v ?? 0)} /></div>
         <ColorField
           label="Titelkleur"
           value={prefs.titleColor}
           onChange={(v) => setPref("titleColor", v)}
           placeholder={t.text}
         />
+        </CustomGate>
       </div>
-    </CustomGate>
+    </div>
   );
 }
 

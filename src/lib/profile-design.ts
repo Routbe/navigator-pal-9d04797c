@@ -52,6 +52,9 @@ export type AvatarAlign = "left" | "center" | "right";
 export interface ProfileDesignPrefs {
   /** Custom mode: pas als dit aanstaat overschrijven de knoppen hieronder het preset. */
   customDesign: boolean;
+  backgroundCustom: boolean;
+  buttonsCustom: boolean;
+  typographyCustom: boolean;
   wallpaperType: WallpaperType;
   wallpaperColor: string | null;
   /** Id uit `GRADIENT_PRESETS`. */
@@ -73,6 +76,10 @@ export interface ProfileDesignPrefs {
   /** Titelgrootte in procenten (80–180). */
   titleScale: number;
   titleColor: string | null;
+  /** Letterafstand van de profielnaam (-1–12 px). */
+  titleLetterSpacing: number;
+  /** Gloedsterkte van de profielnaam (0–40 px). */
+  titleGlow: number;
   /** Hoogte van de banner in px (0 = automatisch). */
   bannerHeight: number;
   /** Diameter van de avatar in px. */
@@ -218,6 +225,9 @@ export function footerBlockStyle(
 
 export const DEFAULT_DESIGN_PREFS: ProfileDesignPrefs = {
   customDesign: false,
+  backgroundCustom: false,
+  buttonsCustom: false,
+  typographyCustom: false,
   wallpaperType: "theme",
   wallpaperColor: null,
   wallpaperGradient: "obsidian",
@@ -234,6 +244,8 @@ export const DEFAULT_DESIGN_PREFS: ProfileDesignPrefs = {
   fontScale: 100,
   titleScale: 100,
   titleColor: null,
+  titleLetterSpacing: 0,
+  titleGlow: 0,
   bannerHeight: 128,
   avatarSize: 80,
   avatarAlign: "center",
@@ -631,7 +643,7 @@ export function wallpaperStyle(
   d: ProfileDesignPrefs,
   theme: { bg: string },
 ): Record<string, string> | null {
-  if (!d.customDesign || d.wallpaperType === "theme") return null;
+  if (!(d.backgroundCustom || d.customDesign) || d.wallpaperType === "theme") return null;
   if (d.wallpaperType === "solid") return { background: d.wallpaperColor ?? theme.bg };
   if (d.wallpaperType === "gradient") return { background: gradientCss(d.wallpaperGradient) };
   if (d.wallpaperType === "image" && d.wallpaperImageUrl) {
@@ -650,7 +662,7 @@ export function wallpaperStyle(
  * de hele editor rondom de preview in plaats van enkel de profielachtergrond.
  */
 export function wallpaperImageLayerStyle(d: ProfileDesignPrefs): Record<string, string> | null {
-  if (!d.customDesign || d.wallpaperType !== "image" || !d.wallpaperImageUrl) return null;
+  if (!(d.backgroundCustom || d.customDesign) || d.wallpaperType !== "image" || !d.wallpaperImageUrl) return null;
   return {
     backgroundImage: `url("${d.wallpaperImageUrl}")`,
     backgroundSize: "cover",
@@ -664,7 +676,7 @@ export function wallpaperImageLayerStyle(d: ProfileDesignPrefs): Record<string, 
 
 /** Verduistering bovenop de achtergrondafbeelding (zonder blur). */
 export function wallpaperOverlayStyle(d: ProfileDesignPrefs): Record<string, string> | null {
-  if (!d.customDesign || d.wallpaperType !== "image" || !d.wallpaperImageUrl) return null;
+  if (!(d.backgroundCustom || d.customDesign) || d.wallpaperType !== "image" || !d.wallpaperImageUrl) return null;
   return { background: `rgba(0,0,0,${(d.wallpaperOverlay / 100).toFixed(2)})` };
 }
 
@@ -673,7 +685,7 @@ export function designButtonStyle(
   d: ProfileDesignPrefs,
   theme: { bg: string; card: string; text: string; border: string; accent?: string },
 ): Record<string, string | number> | null {
-  if (!d.customDesign) return null;
+  if (!(d.buttonsCustom || d.customDesign)) return null;
   const radius = (BUTTON_RADII.find((r) => r.id === d.buttonRadius) ?? BUTTON_RADII[2]!).px;
   const accent = d.buttonColor ?? theme.accent ?? theme.card;
   const text = d.buttonTextColor ?? theme.text;
@@ -768,6 +780,9 @@ const httpsUrl = (value: unknown): string | null =>
 export function normalizeDesignPrefs(r: Record<string, unknown>): ProfileDesignPrefs {
   return {
     customDesign: Boolean(r["customDesign"]),
+    backgroundCustom: r["backgroundCustom"] === undefined ? Boolean(r["customDesign"]) : Boolean(r["backgroundCustom"]),
+    buttonsCustom: r["buttonsCustom"] === undefined ? Boolean(r["customDesign"]) : Boolean(r["buttonsCustom"]),
+    typographyCustom: r["typographyCustom"] === undefined ? Boolean(r["customDesign"]) : Boolean(r["typographyCustom"]),
     wallpaperType: pick(
       r["wallpaperType"],
       ["theme", "solid", "gradient", "image"] as const,
@@ -810,6 +825,8 @@ export function normalizeDesignPrefs(r: Record<string, unknown>): ProfileDesignP
     fontScale: num(r["fontScale"], 85, 125, 100),
     titleScale: num(r["titleScale"], 80, 180, 100),
     titleColor: hex(r["titleColor"]),
+    titleLetterSpacing: num(r["titleLetterSpacing"], -1, 12, 0),
+    titleGlow: num(r["titleGlow"], 0, 40, 0),
     bannerHeight: num(r["bannerHeight"], 64, 360, 128),
     avatarSize: num(r["avatarSize"], 56, 160, 80),
     avatarAlign: pick(r["avatarAlign"], ["left", "center", "right"] as const, "center"),

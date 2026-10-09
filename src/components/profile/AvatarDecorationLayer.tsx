@@ -258,6 +258,54 @@ export function AvatarDecorationLayer({ decoration }: { decoration: AvatarDecora
           ))}
         </g>,
       );
+    case "bear_ears":
+      return svg(<g fill="#92400e" stroke="#451a03" strokeWidth="2"><circle cx="20" cy="8" r="15" /><circle cx="80" cy="8" r="15" /><circle cx="20" cy="8" r="7" fill="#fbbf24" /><circle cx="80" cy="8" r="7" fill="#fbbf24" /></g>);
+    case "fox_ears":
+      return svg(<g><path d="M8 20L20-18l27 28zM92 20L80-18 53 10z" fill="#f97316" stroke="#7c2d12" strokeWidth="2" /><path d="M18 8l4-15 12 14zM82 8L78-7 66 7z" fill="#fff7ed" /></g>);
+    case "frog_hat":
+      return svg(<g><path d="M6 25Q50-12 94 25Q72 12 50 14T6 25" fill="#4ade80" /><circle cx="28" cy="1" r="10" fill="#4ade80" /><circle cx="72" cy="1" r="10" fill="#4ade80" /><circle cx="28" cy="0" r="3" fill="#052e16" /><circle cx="72" cy="0" r="3" fill="#052e16" /></g>);
+    case "butterfly":
+      return svg(<g transform="translate(90 8) rotate(12)"><ellipse cx="-7" cy="0" rx="9" ry="14" fill="#c084fc" /><ellipse cx="7" cy="0" rx="9" ry="14" fill="#f472b6" /><ellipse cx="-5" cy="15" rx="6" ry="9" fill="#818cf8" /><ellipse cx="5" cy="15" rx="6" ry="9" fill="#fb7185" /><path d="M0-8v30" stroke="#312e81" strokeWidth="3" /></g>);
+    case "flower_crown":
+      return svg(<g>{[20,35,50,65,80].map((x,i)=><g key={x} transform={`translate(${x} ${i%2?0:4})`}><circle r="8" fill={i%2?"#f9a8d4":"#fde68a"}/><circle r="3" fill="#fff7ed"/></g>)}</g>);
+    case "cloud_rainbow":
+      return svg(<g><path d="M24 8Q50-20 76 8" fill="none" stroke="#fb7185" strokeWidth="12"/><path d="M29 8Q50-11 71 8" fill="none" stroke="#facc15" strokeWidth="7"/><path d="M34 8Q50-3 66 8" fill="none" stroke="#38bdf8" strokeWidth="4"/><g fill="#f8fafc"><circle cx="22" cy="10" r="12"/><circle cx="78" cy="10" r="12"/></g></g>);
+    case "music_notes":
+      return svg(<g fill="#22d3ee"><path d="M6 4v25a7 7 0 1 0 4 6V12l19-5v17a7 7 0 1 0 4 6V-4z"/><path d="M82 0v20a6 6 0 1 0 4 6V8l12 5V5z" fill="#f472b6"/></g>);
+    case "gamer_wings":
+      return svg(<g fill="#6366f1" stroke="#22d3ee" strokeWidth="1.5"><path d="M8 28L-18 2 3 10-8-12 29 17z"/><path d="M92 28l26-26-21 8 11-22-37 29z"/></g>);
+    case "neon_bolts":
+      return svg(<g fill="#22d3ee" stroke="#f0fdfa" strokeWidth="1"><path d="M4-8L-8 28H8L1 54l28-40H13L24-8z"/><path d="M96-8l12 36H92l7 26-28-40h16L76-8z"/></g>);
+    case "robot_antenna":
+      return svg(<g><path d="M50 12V-16" stroke="#94a3b8" strokeWidth="5"/><circle cx="50" cy="-20" r="8" fill="#ef4444"/><rect x="28" y="-1" width="44" height="20" rx="7" fill="#64748b"/><circle cx="40" cy="8" r="3" fill="#22d3ee"/><circle cx="60" cy="8" r="3" fill="#22d3ee"/></g>);
+    case "space_helmet":
+      return svg(<g fill="none"><path d="M-4 58C-4-20 104-20 104 58" stroke="#cbd5e1" strokeWidth="8"/><path d="M3 54C6-8 94-8 97 54" stroke="#38bdf8" strokeWidth="3" opacity=".8"/><circle cx="91" cy="18" r="5" fill="#fde68a"/></g>);
+    case "moon_crown":
+      return svg(<g><path d="M22 13l8-24 17 15L60-15l11 19 12-15-5 27z" fill="#312e81" stroke="#a78bfa" strokeWidth="2"/><path d="M55-9a12 12 0 1 0 10 18A10 10 0 1 1 55-9" fill="#fde68a"/></g>);
+    case "autumn_leaves":
+      return svg(<g>{[[8,5,-35],[29,-5,-12],[70,-5,12],[92,7,35]].map(([x,y,a],i)=><path key={i} d="M0-12L5-4 12-2 6 4 7 12 0 7-7 12-6 4-12-2-5-4z" fill={i%2?"#f97316":"#eab308"} transform={`translate(${x} ${y}) rotate(${a}) scale(.8)`}/>)}</g>);
+    case "holly":
+      return svg(<g><path d="M14 13Q23-8 46 2 29 14 14 13M86 13Q77-8 54 2 71 14 86 13" fill="#15803d"/><circle cx="45" cy="8" r="5" fill="#dc2626"/><circle cx="55" cy="8" r="5" fill="#b91c1c"/></g>);
+    case "sun_rays":
+      return svg(<g fill="#facc15">{Array.from({length:12},(_,i)=><path key={i} d="M46-26h8l-2 24h-4z" transform={`rotate(${i*30} 50 50)`}/>)}</g>);
+    case "ocean_shells":
+      return svg(<g fill="#fda4af" stroke="#0e7490" strokeWidth="1.5"><path d="M6 16Q18-12 34 16Q20 9 6 16z"/><path d="M66 16Q82-12 94 16Q80 9 66 16z"/><path d="M42 5q8-20 16 0l-8 10z" fill="#fde68a"/></g>);
+    case "royal_crown":
+      return svg(<g><path d="M15 12L8-15 34 1 50-22 66 1l26-16-7 27z" fill="#fbbf24" stroke="#92400e" strokeWidth="2"/><circle cx="50" cy="-5" r="5" fill="#ef4444"/><circle cx="22" cy="2" r="4" fill="#38bdf8"/><circle cx="78" cy="2" r="4" fill="#38bdf8"/></g>);
+    case "diamond_wings":
+      return svg(<g fill="#a5f3fc" stroke="#0891b2" strokeWidth="1.5"><path d="M15-9L-10 20 21 14 34 2z"/><path d="M85-9l25 29-31-6L66 2z"/><path d="M15-9L21 14 3 29z"/><path d="M85-9L79 14l18 15z"/></g>);
+    case "laurels":
+      return svg(<g fill="#d4af37">{[20,32,44,56,68,80].map((y,i)=><g key={y}><ellipse cx={12+i} cy={y} rx="8" ry="4" transform={`rotate(${-45+i*5} ${12+i} ${y})`}/><ellipse cx={88-i} cy={y} rx="8" ry="4" transform={`rotate(${45-i*5} ${88-i} ${y})`}/></g>)}</g>);
+    case "magic_runes":
+      return svg(<g className="rout-deco-orbit-inner" fill="none" stroke="#c4b5fd" strokeWidth="2"><circle cx="50" cy="50" r="59" strokeDasharray="3 7"/>{[0,60,120,180,240,300].map(a=><path key={a} d="M48-12h4v7h5l-7 8-7-8h5z" transform={`rotate(${a} 50 50)`}/>)}</g>);
+    case "heart_orbit":
+      return svg(<g className="rout-deco-orbit-inner" fill="#fb7185">{[0,90,180,270].map(a=><path key={a} d="M50-10c-9-8-15 5 0 15 15-10 9-23 0-15" transform={`rotate(${a} 50 50) scale(.65)`}/>)}</g>);
+    case "comet_trail":
+      return svg(<g><path d="M-12 78Q25 16 79-4" fill="none" stroke="#60a5fa" strokeWidth="5" strokeDasharray="4 5" opacity=".7"/><path d="M77-14l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z" fill="#fde68a"/></g>);
+    case "confetti":
+      return svg(<g>{[[5,0,"#f43f5e"],[20,-12,"#22c55e"],[38,2,"#3b82f6"],[61,-9,"#eab308"],[80,4,"#a855f7"],[96,-13,"#f97316"]].map(([x,y,c],i)=><rect key={i} x={Number(x)} y={Number(y)} width="5" height="12" rx="2" fill={String(c)} transform={`rotate(${i%2?25:-25} ${x} ${y})`}/>)}</g>);
+    case "cloud_pals":
+      return svg(<g fill="#e0f2fe" stroke="#7dd3fc"><path d="M-12 20q2-15 16-11 8-13 20 0 15-2 15 12z"/><path d="M61 13q2-15 16-11 8-13 20 0 15-2 15 12z"/></g>);
     default:
       return null;
   }
