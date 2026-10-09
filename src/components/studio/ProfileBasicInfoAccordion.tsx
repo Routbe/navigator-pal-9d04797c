@@ -36,17 +36,6 @@ const EMOJI_QUICK_PICK = [
   "🌱",
 ];
 
-/** De zeven primaire kanalen die als compacte pillenrij onder de bio staan. */
-const PRIMARY_SOCIALS: { kind: string; label: string }[] = [
-  { kind: "bluesky", label: "Bluesky" },
-  { kind: "x", label: "X / Twitter" },
-  { kind: "github", label: "GitHub" },
-  { kind: "linkedin", label: "LinkedIn" },
-  { kind: "instagram", label: "Instagram" },
-  { kind: "mastodon", label: "Mastodon" },
-  { kind: "email", label: "E-mail" },
-];
-
 interface Props {
   displayName: string;
   onDisplayNameChange: (value: string) => void;
@@ -104,33 +93,6 @@ export function ProfileBasicInfoAccordion({
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [avatarSource, setAvatarSource] = useState("");
   const [fetching, setFetching] = useState(false);
-
-  const socialValues = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const block of blocks) {
-      if (!map[block.kind]) map[block.kind] = block.value;
-    }
-    return map;
-  }, [blocks]);
-
-  /** Zet de handle in het juiste blok (of ruimt het lege blok op). */
-  const setSocial = (kind: string, raw: string) => {
-    const value = raw.trim() ? extractHandle(kind, raw) : "";
-    const existing = blocks.find((b) => b.kind === kind);
-    if (!value) {
-      onBlocksChange(existing ? blocks.filter((b) => b.id !== existing.id) : blocks);
-      return;
-    }
-    if (existing) {
-      onBlocksChange(blocks.map((b) => (b.id === existing.id ? { ...b, value } : b)));
-      return;
-    }
-    const def = BLOCK_KINDS.find((k) => k.kind === kind);
-    onBlocksChange([
-      ...blocks,
-      { id: newBlockId(), kind, label: def?.label ?? kind, value },
-    ]);
-  };
 
   const applyAvatarSource = async () => {
     const raw = avatarSource.trim();
