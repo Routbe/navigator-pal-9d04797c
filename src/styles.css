@@ -818,6 +818,7 @@ select:focus-visible {
   transform-origin: 50% 50%;
   animation: rout-deco-orbit 18s linear infinite;
 }
+.rout-deco-pulse { animation: rout-frame-pulse 2.8s ease-in-out infinite; }
 .rout-footer-ticker {
   display: inline-block;
   animation: rout-footer-ticker 18s linear infinite;
@@ -828,6 +829,7 @@ select:focus-visible {
   .rout-deco-float,
   .rout-deco-flicker,
   .rout-deco-scan,
+  .rout-deco-pulse,
   .rout-footer-ticker,
   .rout-deco-orbit .rout-deco-orbit-inner {
     animation: none;

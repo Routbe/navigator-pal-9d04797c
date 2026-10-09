@@ -36,7 +36,7 @@ export function AvatarDecorationPicker({
       <DecorGrid
         items={AVATAR_DECORATION_DEFS}
         categories={DECORATION_CATEGORIES}
-        popular={["cat_ears", "angel_halo", "headphones", "star_orbit", "sakura_branch"]}
+        popular={["cat_ears", "royal_crown", "gamer_wings", "magic_runes", "cloud_rainbow", "sakura_branch"]}
         value={value}
         onChange={(id) => onChange(id as AvatarDecoration)}
         favKey="rout:fav-decor"
