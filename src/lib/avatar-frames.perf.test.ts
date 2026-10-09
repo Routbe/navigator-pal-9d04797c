@@ -1,5 +1,5 @@
 /**
- * Performancebudget voor de 24 avatarkaders.
+ * Performancebudget voor de volledige catalogus van 152 avatarkaders.
  *
  * De kaders zitten op elk publiek profiel en in de studio-preview. Deze test
  * houdt hun kosten meetbaar: het stijlen van alle kaders moet ruim binnen één
@@ -24,9 +24,9 @@ const theme: FrameTheme = {
 };
 
 describe("avatar frame performance", () => {
-  it("levert exact 24 kaders", () => {
-    expect(AVATAR_FRAME_IDS).toHaveLength(24);
-    expect(AVATAR_FRAME_DEFS).toHaveLength(24);
+  it("levert alle 152 kaders", () => {
+    expect(AVATAR_FRAME_IDS).toHaveLength(152);
+    expect(AVATAR_FRAME_DEFS).toHaveLength(152);
   });
 
   it("stijlt alle kaders 200 keer binnen één frame-budget", () => {

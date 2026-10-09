@@ -82,7 +82,7 @@ export async function readOrCreateProfileDraft(
   const row = rows[0];
   if (!row) throw new Error("draft_not_found");
   return {
-    payload: (row["payload"] as ProfileDraftPayload | null) ?? livePayload,
+    payload: (row["payload"] as SerializableDraftPayload | null) ?? (livePayload as SerializableDraftPayload),
     meta: rowMeta(row),
   };
 }
@@ -135,7 +135,7 @@ export async function discardProfileDraft(
   space: ProfileSpace,
   livePayload: ProfileDraftPayload,
   expectedRevision: number,
-): Promise<{ payload: ProfileDraftPayload; meta: DraftMeta }> {
+): Promise<{ payload: SerializableDraftPayload; meta: DraftMeta }> {
   const saved = await saveProfileDraft(userId, space, livePayload, expectedRevision);
   const rows = (await sql`
     update public.profile_drafts
