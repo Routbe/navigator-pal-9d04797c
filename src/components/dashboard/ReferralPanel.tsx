@@ -10,7 +10,7 @@ import { INVITE_TIERS, nextMilestone, type ReferralReward } from "@/lib/referral
 import { useI18n } from "@/lib/i18n";
 
 /**
- * Referral hub — de persoonlijke uitnodigingslink (`rout.be/signup?ref=…`), het
+ * Referral hub — de persoonlijke uitnodigingslink (`rout.be/r/<handle> of /r/u/<alias>`), het
  * aantal aangesloten vrienden en de mijlpalen die daar korting of een badge aan
  * koppelen (3 = 50%, 3 geverifieerd = gratis, 10 = gratis + De Influencer).
  *
@@ -89,7 +89,7 @@ export function ReferralPanel() {
   };
 
   return (
-    <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-lg font-medium">{t("referral.title")}</h2>
         <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
