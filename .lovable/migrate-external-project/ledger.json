@@ -1,0 +1,13 @@
+{
+  "source": "github: Routbe/navigator-pal (Rout / rout.be)",
+  "capabilities": [
+    { "capability": "application code", "source": "github repo", "outcome": "migrated", "status": "verified", "next_action": null },
+    { "capability": "database schema (59 migrations, Neon Postgres)", "source": "db/*.sql", "outcome": "pending", "status": "blocked", "next_action": "DATABASE_URL / MIGRATION_URL nodig; of migreren naar Lovable Cloud" },
+    { "capability": "database records", "source": "none attached", "outcome": "pending", "status": "blocked", "next_action": "per-table CSV/JSON exports aanleveren" },
+    { "capability": "auth (Better Auth, passkeys, OAuth)", "source": "repo", "outcome": "code migrated", "status": "blocked", "next_action": "BETTER_AUTH_URL/secret + database nodig" },
+    { "capability": "Stripe payments + webhooks", "source": "repo", "outcome": "code preserved", "status": "blocked", "next_action": "Stripe keys via secrets-formulier" },
+    { "capability": "bunq OAuth / SEPA", "source": "repo", "outcome": "code preserved", "status": "blocked", "next_action": "bunq credentials" },
+    { "capability": "public API routes + crons", "source": "repo", "outcome": "code migrated", "status": "unverified", "next_action": "verifiëren na database-koppeling" },
+    { "capability": "env vars (ROUT_API_KEY, PSP_ENCRYPTION_KEY, ...)", "source": "ENVIRONMENT.md", "outcome": "pending", "status": "blocked", "next_action": "waardes via secrets-formulier toevoegen" }
+  ]
+}
