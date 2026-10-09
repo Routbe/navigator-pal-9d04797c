@@ -30,14 +30,33 @@ export type StudioProfileDTO = {
   aliasHandle: string | null;
   isBusiness?: boolean;
   isInfluencer?: boolean;
+  draftRevision: number;
+  publishedRevision: number;
+  hasUnpublishedChanges: boolean;
+  draftUpdatedAt: string | null;
+  publishedAt: string | null;
 };
 
 export const getStudioProfile = createServerFn({ method: "GET" })
   .middleware([requireAuth])
   .handler(async ({ context }) => {
     const { readStudioProfile } = await import("./studio-profile.server");
-    const profile = await readStudioProfile(context.userId);
-    return profile as StudioProfileDTO | null;
+    const live = await readStudioProfile(context.userId);
+    if (!live) return null;
+    const { readOrCreateProfileDraft } = await import("./profile-drafts.server");
+    const livePayload: SaveStudioProfileInput = {
+      username: live.username ?? "",
+      displayName: live.displayName,
+      tagline: live.tagline,
+      avatarUrl: live.avatarUrl,
+      faviconUrl: live.faviconUrl,
+      theme: live.theme,
+      cardStyle: live.cardStyle,
+      blocks: live.blocks as Json[],
+      displayPrefs: live.displayPrefs as Record<string, Json>,
+    };
+    const draft = await readOrCreateProfileDraft(context.userId, "verified", livePayload);
+    return { ...live, ...draft.payload, ...draft.meta } as StudioProfileDTO;
   });
 
 export type SaveStudioProfileInput = {
@@ -50,6 +69,7 @@ export type SaveStudioProfileInput = {
   cardStyle?: string | null;
   blocks?: Json[];
   displayPrefs?: Record<string, Json> | null;
+  expectedRevision?: number;
 };
 
 const jsonValueSchema = z.union([
@@ -76,7 +96,9 @@ const saveStudioProfileSchema = z.strictObject({
   cardStyle: z.string().trim().min(1).max(40).nullable().optional(),
   blocks: z.array(jsonRecordSchema).max(100).optional(),
   displayPrefs: jsonRecordSchema.nullable().optional(),
+  expectedRevision: z.number().int().min(0).optional(),
 });
+const revisionSchema = z.strictObject({ expectedRevision: z.number().int().min(1) });
 const handleSchema = z.strictObject({ handle: z.string().trim().min(1).max(60) });
 
 function validateStudioProfile(input: unknown): SaveStudioProfileInput {
@@ -97,13 +119,70 @@ export const saveStudioProfile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator(validateStudioProfile)
   .handler(async ({ data, context }) => {
-    const { writeStudioProfile } = await import("./studio-profile.server");
     try {
-      const profile = (await writeStudioProfile(context.userId, data)) as StudioProfileDTO;
-      return { ok: true as const, profile, reason: null };
+      const { saveProfileDraft } = await import("./profile-drafts.server");
+      const { expectedRevision = 0, ...payload } = data;
+      const meta = await saveProfileDraft(context.userId, "verified", payload, expectedRevision);
+      return { ok: true as const, profile: { ...payload, ...meta }, reason: null };
     } catch (error) {
       const reason = error instanceof Error ? error.message : "save_failed";
       return { ok: false as const, profile: null, reason };
+    }
+  });
+
+export const publishStudioProfile = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .inputValidator((input) => revisionSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    try {
+      const { readOrCreateProfileDraft, publishProfileDraft } = await import("./profile-drafts.server");
+      const { readStudioProfile, isHandleFree } = await import("./studio-profile.server");
+      const live = await readStudioProfile(context.userId);
+      if (!live) throw new Error("profile_not_found");
+      const current = await readOrCreateProfileDraft(context.userId, "verified", {
+        username: live.username ?? "",
+        displayName: live.displayName,
+        tagline: live.tagline,
+        avatarUrl: live.avatarUrl,
+        faviconUrl: live.faviconUrl,
+        theme: live.theme,
+        cardStyle: live.cardStyle,
+        blocks: live.blocks,
+        displayPrefs: live.displayPrefs,
+      });
+      const username = String(current.payload.username ?? "");
+      const available = await isHandleFree(username, context.userId);
+      if (!available.ok) throw new Error(`handle_${available.reason}`);
+      const meta = await publishProfileDraft(context.userId, "verified", data.expectedRevision);
+      return { ok: true as const, meta, reason: null };
+    } catch (error) {
+      return { ok: false as const, meta: null, reason: error instanceof Error ? error.message : "publish_failed" };
+    }
+  });
+
+export const discardStudioDraft = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .inputValidator((input) => revisionSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    try {
+      const { readStudioProfile } = await import("./studio-profile.server");
+      const { discardProfileDraft } = await import("./profile-drafts.server");
+      const live = await readStudioProfile(context.userId);
+      if (!live) throw new Error("profile_not_found");
+      const result = await discardProfileDraft(context.userId, "verified", {
+        username: live.username ?? "",
+        displayName: live.displayName,
+        tagline: live.tagline,
+        avatarUrl: live.avatarUrl,
+        faviconUrl: live.faviconUrl,
+        theme: live.theme,
+        cardStyle: live.cardStyle,
+        blocks: live.blocks,
+        displayPrefs: live.displayPrefs,
+      }, data.expectedRevision);
+      return { ok: true as const, ...result, reason: null };
+    } catch (error) {
+      return { ok: false as const, payload: null, meta: null, reason: error instanceof Error ? error.message : "discard_failed" };
     }
   });
 
