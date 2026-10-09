@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Check, Loader2, MapPin, Smile } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -7,10 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { AvatarUpload } from "@/components/settings/AvatarUpload";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { styledProfilePath, type UrlStyle } from "@/lib/profile-url";
-import { SocialPlatformIcon } from "@/lib/social-icons";
-import { extractHandle } from "@/lib/social-handles";
 import { AVATAR_SHAPES, type AvatarShape, type ProfileDisplayPrefs } from "@/lib/profile-display";
-import { BLOCK_KINDS, newBlockId, type ProfileBlock } from "@/lib/profile";
+import { type ProfileBlock } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
 /** Tekens die de studio hard afdwingt (de server knipt ook nog eens af). */
@@ -34,17 +32,6 @@ const EMOJI_QUICK_PICK = [
   "🛠️",
   "📸",
   "🌱",
-];
-
-/** De zeven primaire kanalen die als compacte pillenrij onder de bio staan. */
-const PRIMARY_SOCIALS: { kind: string; label: string }[] = [
-  { kind: "bluesky", label: "Bluesky" },
-  { kind: "x", label: "X / Twitter" },
-  { kind: "github", label: "GitHub" },
-  { kind: "linkedin", label: "LinkedIn" },
-  { kind: "instagram", label: "Instagram" },
-  { kind: "mastodon", label: "Mastodon" },
-  { kind: "email", label: "E-mail" },
 ];
 
 interface Props {
@@ -104,33 +91,6 @@ export function ProfileBasicInfoAccordion({
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [avatarSource, setAvatarSource] = useState("");
   const [fetching, setFetching] = useState(false);
-
-  const socialValues = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const block of blocks) {
-      if (!map[block.kind]) map[block.kind] = block.value;
-    }
-    return map;
-  }, [blocks]);
-
-  /** Zet de handle in het juiste blok (of ruimt het lege blok op). */
-  const setSocial = (kind: string, raw: string) => {
-    const value = raw.trim() ? extractHandle(kind, raw) : "";
-    const existing = blocks.find((b) => b.kind === kind);
-    if (!value) {
-      onBlocksChange(existing ? blocks.filter((b) => b.id !== existing.id) : blocks);
-      return;
-    }
-    if (existing) {
-      onBlocksChange(blocks.map((b) => (b.id === existing.id ? { ...b, value } : b)));
-      return;
-    }
-    const def = BLOCK_KINDS.find((k) => k.kind === kind);
-    onBlocksChange([
-      ...blocks,
-      { id: newBlockId(), kind, label: def?.label ?? kind, value },
-    ]);
-  };
 
   const applyAvatarSource = async () => {
     const raw = avatarSource.trim();
@@ -325,34 +285,6 @@ export function ProfileBasicInfoAccordion({
                   aria-label="Locatiebadge"
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Primaire sociale kanalen: compacte pillenrij onder de bio. */}
-          <div className="space-y-2 rounded-xl border border-border bg-background p-3">
-            <h3 className="text-[11px] font-medium text-muted-foreground">
-              Primaire kanalen — typ je @handle, wij maken de link
-            </h3>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PRIMARY_SOCIALS.map(({ kind, label }) => (
-                <div
-                  key={kind}
-                  className="flex items-center gap-2 rounded-xl border border-border bg-card px-2"
-                >
-                  <SocialPlatformIcon source={kind} className="h-4 w-4 shrink-0" />
-                  <Input
-                    value={socialValues[kind] ?? ""}
-                    placeholder={
-                      kind === "email"
-                        ? "hallo@rout.be"
-                        : `@${BLOCK_KINDS.find((k) => k.kind === kind)?.placeholder ?? "handle"}`
-                    }
-                    onChange={(e) => setSocial(kind, e.target.value)}
-                    className="input-field h-9 border-0 bg-transparent px-1 text-xs shadow-none focus-visible:ring-0"
-                    aria-label={label}
-                  />
-                </div>
-              ))}
             </div>
           </div>
 

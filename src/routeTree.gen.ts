@@ -95,6 +95,7 @@ import { Route as ApiPublicGalleryMediaRouteImport } from './routes/api_.public.
 import { Route as ApiPublicHealthRouteImport } from './routes/api_.public.health'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api_.public.stripe-webhook'
 import { Route as AuthMastodonCallbackRouteImport } from './routes/auth_.mastodon.callback'
+import { Route as RUAliasRouteImport } from './routes/r.u.$alias'
 import { Route as UUsernameSlugRouteImport } from './routes/u.$username.$slug'
 import { Route as UUsernameDonateRouteImport } from './routes/u.$username.donate'
 import { Route as UUsernameTipRouteImport } from './routes/u.$username.tip'
@@ -579,6 +580,11 @@ const AuthMastodonCallbackRoute = AuthMastodonCallbackRouteImport.update({
   path: '/auth/mastodon/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RUAliasRoute = RUAliasRouteImport.update({
+  id: '/r/u/$alias',
+  path: '/r/u/$alias',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameSlugRoute = UUsernameSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -886,6 +892,7 @@ export interface FileRoutesByFullPath {
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/auth/mastodon/callback': typeof AuthMastodonCallbackRoute
+  '/r/u/$alias': typeof RUAliasRoute
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
@@ -1009,6 +1016,7 @@ export interface FileRoutesByTo {
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/auth/mastodon/callback': typeof AuthMastodonCallbackRoute
+  '/r/u/$alias': typeof RUAliasRoute
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
@@ -1136,6 +1144,7 @@ export interface FileRoutesById {
   '/api_/public/health': typeof ApiPublicHealthRoute
   '/api_/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/auth_/mastodon/callback': typeof AuthMastodonCallbackRoute
+  '/r/u/$alias': typeof RUAliasRoute
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
@@ -1264,6 +1273,7 @@ export interface FileRouteTypes {
     | '/api/public/health'
     | '/api/public/stripe-webhook'
     | '/auth/mastodon/callback'
+    | '/r/u/$alias'
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
@@ -1387,6 +1397,7 @@ export interface FileRouteTypes {
     | '/api/public/health'
     | '/api/public/stripe-webhook'
     | '/auth/mastodon/callback'
+    | '/r/u/$alias'
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
@@ -1513,6 +1524,7 @@ export interface FileRouteTypes {
     | '/api_/public/health'
     | '/api_/public/stripe-webhook'
     | '/auth_/mastodon/callback'
+    | '/r/u/$alias'
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
@@ -1612,6 +1624,7 @@ export interface RootRouteChildren {
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   AuthMastodonCallbackRoute: typeof AuthMastodonCallbackRoute
+  RUAliasRoute: typeof RUAliasRoute
   ApiPublicAuthProvidersRoute: typeof ApiPublicAuthProvidersRoute
   ApiPublicBadgeHandleRoute: typeof ApiPublicBadgeHandleRoute
   ApiPublicBlueskyCallbackRoute: typeof ApiPublicBlueskyCallbackRoute
@@ -2239,6 +2252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMastodonCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/r/u/$alias': {
+      id: '/r/u/$alias'
+      path: '/r/u/$alias'
+      fullPath: '/r/u/$alias'
+      preLoaderRoute: typeof RUAliasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username/$slug': {
       id: '/u/$username/$slug'
       path: '/$slug'
@@ -2781,6 +2801,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   AuthMastodonCallbackRoute: AuthMastodonCallbackRoute,
+  RUAliasRoute: RUAliasRoute,
   ApiPublicAuthProvidersRoute: ApiPublicAuthProvidersRoute,
   ApiPublicBadgeHandleRoute: ApiPublicBadgeHandleRoute,
   ApiPublicBlueskyCallbackRoute: ApiPublicBlueskyCallbackRoute,

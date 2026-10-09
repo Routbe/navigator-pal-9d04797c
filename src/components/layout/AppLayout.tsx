@@ -9,6 +9,7 @@ import { BackToTop } from "@/components/BackToTop";
 import { NameOnboardingDialog } from "@/components/onboarding/NameOnboardingDialog";
 
 import { ProfileMenu } from "@/components/ProfileMenu";
+import { InviteButton } from "@/components/InviteButton";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LanguageToggle } from "@/components/LanguageToggle";
 
@@ -70,6 +71,7 @@ export function AppLayout({
               Ontdek
             </Link>
             <LanguageToggle className="hidden sm:inline-flex" />
+            <InviteButton />
             <ProfileMenu />
             <MobileMenu />
           </div>

@@ -117,8 +117,6 @@ import { SubdomainPanel } from "@/components/dashboard/SubdomainPanel";
 import { BadgesPanel } from "@/components/dashboard/BadgesPanel";
 import { SocialVerifyPanel } from "@/components/dashboard/SocialVerifyPanel";
 import { TotalReachButton } from "@/components/dashboard/TotalReachModal";
-import { ReferralPanel } from "@/components/dashboard/ReferralPanel";
-import { ReferralAnalytics } from "@/components/dashboard/ReferralAnalytics";
 import { BadgeActivityPanel } from "@/components/dashboard/BadgeActivityPanel";
 import { EmailForwardingPanel } from "@/components/dashboard/EmailForwardingPanel";
 import { EmailAliasDomains } from "@/components/dashboard/EmailAliasDomains";
@@ -827,16 +825,6 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                 onQuickCreate={quickCreate}
                 onAddKind={(kind) => addBlock(kind)}
               >
-                  <section className="space-y-3">
-                    <h2 className="px-1 text-lg font-medium">Referrals &amp; Rewards</h2>
-                    <p className="px-1 text-sm text-muted-foreground">
-                      Nodig vrienden uit met je persoonlijke link. 3 vrienden = 50% korting, 3
-                      geverifieerde vrienden = verificatie zonder kosten, 10 vrienden = verificatie zonder kosten
-                      én de Epic badge “The Influencer”.
-                    </p>
-                    <ReferralPanel />
-                    <ReferralAnalytics />
-                  </section>
 
                   <SocialVerifyPanel handle={normalized || handle} />
 
