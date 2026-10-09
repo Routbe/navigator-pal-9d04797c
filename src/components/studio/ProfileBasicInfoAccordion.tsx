@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Check, Loader2, MapPin, Smile } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -7,10 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { AvatarUpload } from "@/components/settings/AvatarUpload";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { styledProfilePath, type UrlStyle } from "@/lib/profile-url";
-import { SocialPlatformIcon } from "@/lib/social-icons";
-import { extractHandle } from "@/lib/social-handles";
 import { AVATAR_SHAPES, type AvatarShape, type ProfileDisplayPrefs } from "@/lib/profile-display";
-import { BLOCK_KINDS, newBlockId, type ProfileBlock } from "@/lib/profile";
+import { type ProfileBlock } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
 /** Tekens die de studio hard afdwingt (de server knipt ook nog eens af). */
