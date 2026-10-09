@@ -328,34 +328,6 @@ export function ProfileBasicInfoAccordion({
             </div>
           </div>
 
-          {/* Primaire sociale kanalen: compacte pillenrij onder de bio. */}
-          <div className="space-y-2 rounded-xl border border-border bg-background p-3">
-            <h3 className="text-[11px] font-medium text-muted-foreground">
-              Primaire kanalen — typ je @handle, wij maken de link
-            </h3>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PRIMARY_SOCIALS.map(({ kind, label }) => (
-                <div
-                  key={kind}
-                  className="flex items-center gap-2 rounded-xl border border-border bg-card px-2"
-                >
-                  <SocialPlatformIcon source={kind} className="h-4 w-4 shrink-0" />
-                  <Input
-                    value={socialValues[kind] ?? ""}
-                    placeholder={
-                      kind === "email"
-                        ? "hallo@rout.be"
-                        : `@${BLOCK_KINDS.find((k) => k.kind === kind)?.placeholder ?? "handle"}`
-                    }
-                    onChange={(e) => setSocial(kind, e.target.value)}
-                    className="input-field h-9 border-0 bg-transparent px-1 text-xs shadow-none focus-visible:ring-0"
-                    aria-label={label}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-background px-3 py-2">
             <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">
               rout.be{styledProfilePath(normalized || "handle", urlStyle)}

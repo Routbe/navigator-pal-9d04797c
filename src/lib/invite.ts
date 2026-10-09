@@ -25,7 +25,7 @@ export function inviteRef(handle: string | null | undefined, verified: boolean):
   return verified ? clean : `u_${clean}`;
 }
 
-/** Landingspagina van de uitnodiging: `https://rout.be/signup?ref=…`. */
+/** Uitnodiging: `https://rout.be/r/<handle>` (geverifieerd) of `/r/u/<alias>` (gratis). */
 export function inviteUrl(
   handle: string | null | undefined,
   verified: boolean,
@@ -33,7 +33,10 @@ export function inviteUrl(
 ): string {
   const ref = inviteRef(handle, verified);
   if (!ref) return inviteBase(origin);
-  return `${inviteBase(origin)}/signup?ref=${encodeURIComponent(ref)}`;
+  const clean = cleanIdentifier(handle);
+  return verified
+    ? `${inviteBase(origin)}/r/${encodeURIComponent(clean)}`
+    : `${inviteBase(origin)}/r/u/${encodeURIComponent(clean)}`;
 }
 
 /** Directe profiel-link in de juiste namespace (`/u/<alias>` vs `/<handle>`). */
@@ -48,7 +51,7 @@ export function profileInviteUrl(
 }
 
 export const INVITE_INTRO =
-  "Word onderdeel van ROUT — Claim je soevereine digitale identiteit en QR-infrastructuur via mijn uitnodiging:";
+  "Claim je soevereine digitale identiteit op ROUT via mijn uitnodiging:";
 
 export function inviteMessage(link: string): string {
   return `${INVITE_INTRO} ${link}`;
