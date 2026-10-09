@@ -5,6 +5,17 @@ import type { StudioProfileInput } from "@/lib/studio-profile.server";
 
 export type ProfileSpace = "verified" | "alias";
 export type ProfileDraftPayload = StudioProfileInput | AliasProfileInput;
+export type SerializableDraftPayload = {
+  username: string;
+  displayName?: string | null;
+  tagline?: string | null;
+  avatarUrl?: string | null;
+  faviconUrl?: string | null;
+  theme?: string | null;
+  cardStyle?: string | null;
+  blocks?: Record<string, string | number | boolean | null | (string | number | boolean | null)[]>[];
+  displayPrefs?: Record<string, string | number | boolean | null | (string | number | boolean | null)[]> | null;
+};
 
 export type DraftMeta = {
   draftRevision: number;
@@ -55,7 +66,7 @@ export async function readOrCreateProfileDraft(
   userId: string,
   space: ProfileSpace,
   livePayload: ProfileDraftPayload,
-): Promise<{ payload: ProfileDraftPayload; meta: DraftMeta }> {
+): Promise<{ payload: SerializableDraftPayload; meta: DraftMeta }> {
   await ensureDraftTable();
   await sql`
     insert into public.profile_drafts (user_id, space, payload, revision, published_revision, published_at)
@@ -134,5 +145,5 @@ export async function discardProfileDraft(
   `) as Row[];
   const row = rows[0];
   if (!row) throw new Error("draft_conflict");
-  return { payload: (row["payload"] as ProfileDraftPayload) ?? livePayload, meta: rowMeta(row) };
+  return { payload: (row["payload"] as SerializableDraftPayload) ?? (livePayload as SerializableDraftPayload), meta: rowMeta(row) };
 }

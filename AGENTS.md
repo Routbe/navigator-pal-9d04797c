@@ -27,10 +27,12 @@
 - Files live in Scaleway Object Storage via `src/lib/storage/s3.server.ts` (client bucket = member data under `users/<uid>/`, internal bucket = ROUT assets, admin-only); Neon stores only metadata. Why: keeps blobs out of the database and separates customer data from platform assets.
 - Temporary QR files are private objects with `expires_at` in `shared_files` (db/51), served only through `/f/<id>` presigned redirects and purged by cron. Why: shared links must stop working after expiry.
 - OAuth client console settings (publishing status, PKCE, token TTL, IP allowlist, account discovery) are enforced in `provider.server.ts`/`console.functions.ts` server-side, never only in the UI. Why: the console is the developer's control plane; the OIDC endpoints are the security boundary.
-- Every sign-in method (OAuth, magic link, password, Bluesky, Mastodon) returns through `/auth/continue`, which resolves the session server-side and issues one 303; the destination and tour-draft token travel only in HttpOnly cookies set by `beginAuthIntent`, never in the URL. Why: zero-hop redirects, no token leakage, tour choices survive sign-up.
-- Auth emails are sent only through `sendLocalizedEmail` (`src/lib/email.server.ts`): template IDs come from the static registry derived from `src/emails/template-ids.ts`, locale defaults to `en`, and dispatch never blocks (Vercel `waitUntil`) or throws. Why: an email-provider outage must never break sign-in, and swapping providers touches one file.
-- After sign-in, `/auth/continue` applies a tour draft only to new accounts via `applyTourDraftToUser` (`tour-draft-apply.server.ts`); a taken handle falls back to `/onboarding`. Why: existing members must never be overwritten.
+- Every sign-in method returns through `/auth/continue`; destinations and tour drafts use HttpOnly cookies, never URLs. Why: zero-hop redirects and no token leakage.
+- Auth emails use `sendLocalizedEmail`; static template IDs and non-blocking dispatch keep provider outages from breaking sign-in.
+- After sign-in, tour drafts apply only to new accounts; taken handles fall back to onboarding. Why: existing members must never be overwritten.
 
 - Page share images are drawn in code (`src/lib/page-og.server.ts`) from the single logo source `src/lib/brand/logo.ts`, one per page per locale at `/brand/og/<page>-<locale>.png`, cached in the internal bucket under a version prefix; never AI-generated, never rotated. Why: brand fidelity and crawler-cache stability.
 - Bot checks run only through the self-hosted ALTCHA proof-of-work (`altcha.server.ts`, single-use via `altcha_used` db/54); `api_/auth/$.ts` refuses email sign-up/sign-in/magic-link/password-reset with `altcha_invalid` (400) before Better Auth runs. Why: no third-party bot service and no tracking.
+- Studio autosaves private drafts and publishes with revision checks; public reads never use drafts. Why: incomplete edits stay private.
+- Phone verification uses a provider-neutral contract led by the Android gateway; chat channels count only after server confirmation. Why: sovereignty without unproven claims.
 

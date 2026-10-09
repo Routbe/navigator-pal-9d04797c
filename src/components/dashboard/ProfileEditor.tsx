@@ -629,12 +629,17 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   const discard = async () => {
     if (saving || publishing) return;
     setDiscarding(true);
-    const result = await discardDraft({ data: { expectedRevision: draftRevision } }).catch((error) => ({
+    const result = (await discardDraft({ data: { expectedRevision: draftRevision } }).catch((error) => ({
       ok: false as const,
       payload: null,
       meta: null,
       reason: error instanceof Error ? error.message : "discard_failed",
-    }));
+    }))) as {
+      ok: boolean;
+      payload: Record<string, unknown> | null;
+      meta: { draftRevision: number; publishedRevision: number } | null;
+      reason: string | null;
+    };
     setDiscarding(false);
     if (!result.ok || !result.payload || !result.meta) {
       toast.error(result.reason === "draft_conflict" ? "Het concept is in een ander tabblad gewijzigd." : "Wijzigingen verwerpen is mislukt.");
